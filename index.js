@@ -1,4 +1,3 @@
-
 const inquirer = require('inquirer');
 const fs = require('fs');
 
@@ -88,7 +87,7 @@ init = () => {
     questions()
     .then(teamMembers)
     .then((response) => {
-        //console.log(response)
+        console.log(response)
         
         const answersString = generateHTML(response);
         
