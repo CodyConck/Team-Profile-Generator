@@ -1,10 +1,15 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
 
+const Manager = require('./lib/Manager')
+const Engineer = require('./lib/Engineer')
+const Intern = require('./lib/Intern')
+
+const teamArray = [];
+
 const generateHTML = require('./src/generateHTML.js')
 
-
-const questions = () => {
+const managerQuestions = () => {
 
     return inquirer.prompt([
         {
@@ -22,7 +27,7 @@ const questions = () => {
         },
         {
             type: 'input',
-            name: 'employeeID', 
+            name: 'employeeID',
             message: 'Please enter your employee ID number. (Required)',
             validate: employeeIDInput => {
                 if (employeeIDInput) {
@@ -44,26 +49,85 @@ const questions = () => {
             message: 'Please enter your office number.'
         },
     ])
+        .then((answers) => {
+            const newManager = new Manager(answers.manager, answers.employeeID, answers.email, answers.officeNum)
+            teamArray.push(newManager)
+            teamMembers()
+        })
 };
-
-const teamMembers = teamMemberData => {
+//question for adding team members
+const teamMembers = () => {
     console.log(`
 =================
 Add a New Team Member
 =================
 `);
 
-    if (!teamMemberData.employees) {
-        teamMemberData.emplpoyees = [];
-    }
-return inquirer.prompt([
-    {
-        type: 'list',
-        name: 'role', 
-        message: 'Please add to your team, or finish building your team by selecting one of the following:',
-        choices: ['Engineer', 'Intern', 'No thanks, I am finished building my team']
-    },
-//need if statement? to verify choice then prompt questions with temp lits
+    return inquirer.prompt([
+        {
+            type: 'list',
+            name: 'role',
+            message: 'Please add to your team, or finish building your team by selecting one of the following:',
+            choices: ['Engineer', 'Intern', 'No thanks, I am finished building my team']
+
+        },
+
+     ]).then((answer)=>{
+        console.log(answer.role)
+
+         if(answer.role == "Engineer") {
+            // call engineerQuestions
+            engineerQuestions()
+        } else if (answer.role == "Intern") {
+            //call internQuestions
+            internQuestions();
+        } else {
+            console.log(teamArray)
+            //call generateHTML
+            const generateTeam = generateHTML(teamArray);
+            console.log(generateTeam)
+            fs.writeFile('./dist/index.html', generateTeam, err => {
+                if (err) throw err;
+
+                console.log('HTML Generated!');
+            })
+        }
+    })
+};
+//questions for engineer
+const engineerQuestions = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'engineerName',
+            message: 'What is your name? (Required)',
+            validate: engineerInput => {
+                if (engineerInput) {
+                    return true;
+                } else {
+                    console.log('Please enter your name.');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'input',
+            name: 'employeeID',
+            message: 'Please enter your employee ID number. (Required)',
+            validate: employeeIDInput => {
+                if (employeeIDInput) {
+                    return true;
+                } else {
+                    console.log('You can not proceed until you have entered your employee ID number.');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'input',
+            name: 'email',
+            message: 'Please enter your email address.'
+        },
         {
             type: 'input',
             name: 'username',
@@ -76,30 +140,64 @@ return inquirer.prompt([
                     return false;
                 }
             }
-        
         },
-    ])
-};
+    ]).then((answer) => {
+        const newEngineer = new Engineer(answer.engineerName, answer.employeeID, answer.email, answer.username)
+        teamArray.push(newEngineer)
 
-
-
-init = () => { 
-    questions()
-    .then(teamMembers)
-    .then((response) => {
-        console.log(response)
-        
-        const answersString = generateHTML(response);
-        
-        //console.log(answersString)
-
-        fs.writeFile('.index.html', answersString, err => {
-            if (err) throw err;
-
-            console.log('HTML Generated!');
-        })
+        teamMembers()
     })
 }
 
-// Function call to initialize app
-init()
+const internQuestions = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'internName',
+            message: 'What is your name? (Required)',
+            validate: internInput => {
+                if (internInput){
+                    return true;
+                } else {
+                    console.log('Please enter your name.');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'input',
+            name: 'employeeID',
+            message: 'Please enter your employee ID number. (Required)',
+            validate: employeeIDInput => {
+                if (employeeIDInput) {
+                    return true;
+                } else {
+                    console.log('You can not proceed until you have entered your employee ID number.');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'input',
+            name: 'email',
+            message: 'Please enter your email address.'
+        },
+        {
+            type: 'input',
+            name: 'schoolInput',
+            message: 'Please enter your school name.',
+            default: true
+        },
+    ]).then((answer) => {
+        const newIntern = new Intern(answer.internName, answer.employeeID, answer.email, answer.schoolInput)
+        teamArray.push(newIntern)
+
+        teamMembers()
+    })
+}
+managerQuestions()
+    
+        
+                
+                
+
