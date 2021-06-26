@@ -73,7 +73,7 @@ Add a New Team Member
         },
 
      ]).then((answer)=>{
-        console.log(answer.role)
+        //console.log(answer.role)
 
          if(answer.role == "Engineer") {
             // call engineerQuestions
@@ -85,7 +85,7 @@ Add a New Team Member
             console.log(teamArray)
             //call generateHTML
             const generateTeam = generateHTML(teamArray);
-            console.log(generateTeam)
+            //console.log(generateTeam)
             fs.writeFile('./dist/index.html', generateTeam, err => {
                 if (err) throw err;
 
